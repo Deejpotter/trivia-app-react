@@ -9,7 +9,7 @@ function Header() {
                 <div className="container">
                     <div className="brand">
                         <Link to="/">
-                            <img src="/images/logo.png" height="150" />
+                            <img src="/images/logo.png" alt="Deej Potter Designs logo." height="150" />
                         </Link>
                     </div>
                     <Navbar />
