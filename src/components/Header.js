@@ -1,5 +1,6 @@
 import React from 'react';
-import Navlink from './Navlink';
+import { Link } from 'react-router-dom';
+import Navbar from './Navbar';
 
 function Header() {
     return (
@@ -7,21 +8,11 @@ function Header() {
             <div className="navbar shadow">
                 <div className="container">
                     <div className="brand">
-                        <a href="">
-                            <img src="" />
-                        </a>
+                        <Link to="/">
+                            <img src="/images/logo.png" height="150" />
+                        </Link>
                     </div>
-                    <nav>
-                        <label htmlFor="show-menu">Show Menu</label>
-                        <input type="checkbox" id="show-menu" role="button" />
-                        <ul id="menu">
-                            <Navlink content="Home" location="/" />
-                            <Navlink content="Home" location="/" />
-                            <Navlink content="Home" location="/" />
-                            <Navlink content="Home" location="/" />
-                            <Navlink content="Home" location="/" />
-                        </ul>
-                    </nav>
+                    <Navbar />
                 </div>
             </div>
         </header>

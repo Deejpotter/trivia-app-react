@@ -1,9 +1,10 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 
 function Navlink(props) {
     return (
         <li className="nav-item">
-            <a className="nav-link {props.classes}" href="{props.location}">{props.content}</a>
+            <Link className="nav-link" to={props.location}>{props.content}</Link>
         </li>
     );
 }
