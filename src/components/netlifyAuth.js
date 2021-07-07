@@ -7,7 +7,9 @@ const netlifyAuth = {
         this.isAuthenticated = true;
         netlifyIdentity.open();
         netlifyIdentity.on('login', user => {
+            console.log('login', user)
             this.user = user;
+            netlifyIdentity.refresh().then((jwt) => console.log(jwt))
             callback(user);
         });
     },
