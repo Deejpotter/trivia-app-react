@@ -1,12 +1,14 @@
 import React from 'react';
 import { BrowserRouter, Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import netlifyIdentity from 'netlify-identity-widget';
+import netlifyAuth from './components/netlifyAuth';
 import './App.css';
 import Header from './components/Header';
 import Home from './components/Home';
 import Footer from './components/Footer';
 import Trivia from './components/Trivia';
 import Answers from './components/Answers';
-import netlifyIdentity from 'netlify-identity-widget';
+
 
 function App() {
   return (
@@ -29,27 +31,6 @@ function App() {
     </div>
   );
 }
-
-const netlifyAuth = {
-  isAuthenticated: false,
-  user: null,
-  authenticate(callback) {
-    this.isAuthenticated = true;
-    netlifyIdentity.open();
-    netlifyIdentity.on('login', user => {
-      this.user = user;
-      callback(user);
-    });
-  },
-  signout(callback) {
-    this.isAuthenticated = false;
-    netlifyIdentity.logout();
-    netlifyIdentity.on('logout', () => {
-      this.user = null;
-      callback();
-    });
-  }
-};
 
 const AuthButton = withRouter(
   ({ history }) =>
@@ -95,7 +76,7 @@ class Login extends React.Component {
   login = () => {
     netlifyAuth.authenticate(() => {
       this.setState({ redirectToReferrer: true });
-      netlifyIdentity.refresh().then((jwt) => console.log(jwt));
+      netlifyIdentity.refresh().then();
     });
   };
   
