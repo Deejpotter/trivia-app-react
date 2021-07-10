@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Route, Switch, Redirect, withRouter } from 'react-router-dom';
-import netlifyAuth from './components/netlifyAuth';
 import './App.css';
 import Header from './components/Header';
 import Home from './components/Home';
@@ -8,20 +7,22 @@ import Footer from './components/Footer';
 import Trivia from './components/Trivia';
 import Answers from './components/Answers';
 import Login from './components/Login';
+import LoginButton from './components/LoginButton';
 
 
 function App() {
+
+
   return (
     <div>
       <BrowserRouter>
         <Header />
-        <AuthButton />
         <Switch>
           <Route path="/trivia">
             <Trivia />
           </Route>
-          <PrivateRoute path="/answers" component={Answers} />
-          <Route path="/login" component={Login} />
+          {/* <Route path="/answers" component={Answers} /> */}
+          <Route path="/login" component={LoginButton} authorised={false} />
           <Route path="/">
             <Home />
           </Route>
@@ -32,30 +33,18 @@ function App() {
   );
 }
 
-const AuthButton = withRouter(
-  ({ history }) => netlifyAuth.isAuthenticated ? (
-    <p>
-      Welcome!{' '}
-      <button onClick={() => {
-        netlifyAuth.signout(() => history.push('/'));
-      }}>Sign out</button>
-    </p>
-  ) : (
-    <p>You are not logged in.</p>
-  )
-);
 
-function PrivateRoute({ component: Component, ...rest }) {
-  return (
-    <Route {...rest} render={props => netlifyAuth.isAuthenticated ? (
-        <Component {...props} />
-      ) : (
-        <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
-      )
-      }
-    />
-  );
-}
+// function PrivateRoute({ component: Component, ...rest }) {
+//   return (
+//     <Route {...rest} render={props => netlifyAuth.isAuthenticated ? (
+//         <Component {...props} />
+//       ) : (
+//         <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
+//       )
+//       }
+//     />
+//   );
+// }
 
 // class Login extends React.Component {
 //   state = { redirectToReferrer: false };

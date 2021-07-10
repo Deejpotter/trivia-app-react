@@ -4,19 +4,19 @@ const netlifyAuth = {
     isAuthenticated: false,
     user: null,
     authenticate(callback) {
-        this.isAuthenticated = true;
         netlifyIdentity.open();
         netlifyIdentity.on('login', user => {
             console.log('login', user)
+            this.isAuthenticated = true;
             this.user = user;
             netlifyIdentity.refresh().then((jwt) => console.log(jwt))
             callback(user);
         });
     },
     signout(callback) {
-        this.isAuthenticated = false;
         netlifyIdentity.logout();
         netlifyIdentity.on('logout', () => {
+            this.isAuthenticated = false;
             this.user = null;
             callback();
         });

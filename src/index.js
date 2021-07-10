@@ -2,15 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import netlifyIdentity from 'netlify-identity-widget';
-
-window.netlifyIdentity = netlifyIdentity;
-// You must run this once before trying to interact with the widget
-netlifyIdentity.init();
+import { Auth0Provider } from "@auth0/auth0-react";
 
 ReactDOM.render(
-  <React.StrictMode>
+  <Auth0Provider
+    domain="deejpotter.au.auth0.com"
+    clientId="9D0pLCV4rnUW8PsFBqjBA3hujwhSxndS"
+    redirectUri="localhost:3000"
+  >
     <App />
-  </React.StrictMode>,
+  </Auth0Provider>,
   document.getElementById('root')
 );
