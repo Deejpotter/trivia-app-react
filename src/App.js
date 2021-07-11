@@ -1,73 +1,118 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import netlifyIdentity from 'netlify-identity-widget';
+
 import './App.css';
 import Header from './components/Header';
 import Home from './components/Home';
 import Footer from './components/Footer';
 import Trivia from './components/Trivia';
 import Answers from './components/Answers';
-import Login from './components/Login';
-import LoginButton from './components/LoginButton';
 
 
 function App() {
-
-
+  const [authorised, setAuthorised] = useState(false)
+  function handleAuthorised(value) {
+    setAuthorised(value);
+  }
   return (
-    <div>
+    <>
       <BrowserRouter>
         <Header />
+        <AuthButton />
         <Switch>
-          <Route path="/trivia">
-            <Trivia />
-          </Route>
-          {/* <Route path="/answers" component={Answers} /> */}
-          <Route path="/login" component={LoginButton} authorised={false} />
-          <Route path="/">
-            <Home />
-          </Route>
+          <Route path="/trivia" component={Trivia} />
+          <PrivateRoute path="/answers" component={Answers} />
+          <Route path="/login" component={Login} authorised={authorised} handleAuthorised={handleAuthorised} />
+          <Route path="/" component={Home} />
         </Switch>
         <Footer />
       </BrowserRouter>
-    </div>
+    </>
   );
 }
 
+const netlifyAuth = {
+  isAuthenticated: false,
+  user: null,
+  authenticate(callback) {
+    if (!this.isAuthenticated) {
+      netlifyIdentity.open();
+      netlifyIdentity.on('login', user => {
+        this.user = user;
+        this.isAuthenticated = true;
+        callback(user);
+      });
+    } else {
+      <Redirect to="/" />
+    }
+  },
+  signout(callback) {
+    netlifyIdentity.logout();
+    netlifyIdentity.on('logout', () => {
+      this.isAuthenticated = false;
+      this.user = null;
+      callback();
+    });
+  }
+};
 
-// function PrivateRoute({ component: Component, ...rest }) {
-//   return (
-//     <Route {...rest} render={props => netlifyAuth.isAuthenticated ? (
-//         <Component {...props} />
-//       ) : (
-//         <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
-//       )
-//       }
-//     />
-//   );
-// }
+const AuthButton = withRouter(
+  ({ history }) =>
+    netlifyAuth.isAuthenticated ? (
+      <p>
+        Welcome!{' '}
+        <button
+          onClick={() => {
+            netlifyAuth.signout(() => history.push('/'));
+          }}
+        >
+          Sign out
+        </button>
+      </p>
+    ) : (
+      <p>You are not logged in.</p>
+    )
+);
 
-// class Login extends React.Component {
-//   state = { redirectToReferrer: false };
+function PrivateRoute({ component: Component, ...rest }) {
+  return (
+    <Route
+      {...rest}
+      render={props =>
+        netlifyAuth.isAuthenticated ? (
+          <Component {...props} />
+        ) : (
+          <Redirect
+            to={{
+              pathname: '/login',
+              state: { from: props.location }
+            }}
+          />
+        )
+      }
+    />
+  );
+}
 
-//   login = () => {
-//     netlifyAuth.authenticate(() => {
-//       this.setState({ redirectToReferrer: true }) 
-//     });
-//   };
+function Login({ authorised, handleAuthorised, from}) {
 
-//   render() {
-//     let { from } = this.props.location.state || { from: { pathname: '/' } };
-//     let { redirectToReferrer } = this.state;
+  const login = () => {
+    netlifyAuth.authenticate((user) => {
+      handleAuthorised(true);
+      console.log(user);
 
-//     if (redirectToReferrer) return <Redirect to={from} />;
+    });
+  };
 
-//     return (
-//       <div>
-//         <p>You must log in to view the page at {from.pathname}</p>
-//         <button onClick={this.login}>Log in</button>
-//       </div>
-//     );
-//   }
-// }
+  if (authorised) return <Redirect to={from} />;
+
+  return (
+    <div>
+      <p>You must log in to view the page at {from}</p>
+      <button onClick={login}>Log in</button>
+    </div>
+  );
+}
 
 export default App;

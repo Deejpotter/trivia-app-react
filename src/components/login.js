@@ -1,10 +1,10 @@
 import React, { useState, useEffect, Redirect } from 'react';
+import { useIdentityContext } from 'react-netlify-identity';
 
-function Login({ authorised, from }) {
-
-    if (authorised) {
-        return (<Redirect to={from} />);
-    }
+// log in/sign up example
+function Login() {
+    
 }
+
 
 export default Login;

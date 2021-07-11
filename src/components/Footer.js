@@ -1,8 +1,9 @@
 import React from 'react';
 
-function Footer() {
+function Footer({authorised}) {
     return (
         <p>&copy; Deej Potter Designs</p>
+        
     );
 }
 

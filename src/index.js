@@ -1,16 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import netlifyIdentity from 'netlify-identity-widget';
+
 import './index.css';
 import App from './App';
-import { Auth0Provider } from "@auth0/auth0-react";
+
+window.netlifyIdentity = netlifyIdentity;
+netlifyIdentity.init();
 
 ReactDOM.render(
-  <Auth0Provider
-    domain="deejpotter.au.auth0.com"
-    clientId="9D0pLCV4rnUW8PsFBqjBA3hujwhSxndS"
-    redirectUri="localhost:3000"
-  >
+  <React.StrictMode>
     <App />
-  </Auth0Provider>,
+  </React.StrictMode>,
   document.getElementById('root')
 );
