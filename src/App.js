@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import { BrowserRouter, Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import netlifyIdentity from 'netlify-identity-widget';
 
 import './App.css';
@@ -12,17 +12,46 @@ import Answers from './components/Answers';
 
 function App() {
   const [authorised, setAuthorised] = useState(false)
+
+  const user = netlifyIdentity.currentUser();
+  const history = useHistory();
+
   function handleAuthorised(value) {
     setAuthorised(value);
   }
+  if (user && !authorised) {
+    handleAuthorised(true);
+  }
+  netlifyIdentity.on('open', () => {
+    if (user) {
+      handleAuthorised(true);
+      netlifyIdentity.close();
+      history.push('/');
+    }
+  });
+  netlifyIdentity.on('login', () => {
+    if (user) {
+      handleAuthorised(true);
+      netlifyIdentity.close();
+      history.push('/');
+    }
+  });
+  netlifyIdentity.on('logout', () => {
+    if (user) {
+      handleAuthorised(false);
+      history.push('/');
+    }
+  });
+  console.log(user);
+
   return (
     <>
       <BrowserRouter>
         <Header />
-        <AuthButton />
+        <AuthButton authorised={authorised} handleAuthorised={handleAuthorised} />
         <Switch>
           <Route path="/trivia" component={Trivia} />
-          <PrivateRoute path="/answers" component={Answers} />
+          <PrivateRoute path="/answers" component={Answers} authorised={authorised} handleAuthorised={handleAuthorised} />
           <Route path="/login" component={Login} authorised={authorised} handleAuthorised={handleAuthorised} />
           <Route path="/" component={Home} />
         </Switch>
@@ -33,60 +62,49 @@ function App() {
 }
 
 const netlifyAuth = {
-  isAuthenticated: false,
-  user: null,
-  authenticate(callback) {
-    if (!this.isAuthenticated) {
-      netlifyIdentity.open();
-      netlifyIdentity.on('login', user => {
-        this.user = user;
-        this.isAuthenticated = true;
-        callback(user);
-      });
-    } else {
-      <Redirect to="/" />
-    }
+  authenticate() {
+    netlifyIdentity.open();
   },
-  signout(callback) {
+  signout() {
     netlifyIdentity.logout();
-    netlifyIdentity.on('logout', () => {
-      this.isAuthenticated = false;
-      this.user = null;
-      callback();
-    });
   }
 };
 
-const AuthButton = withRouter(
-  ({ history }) =>
-    netlifyAuth.isAuthenticated ? (
+function AuthButton({ authorised, handleAuthorised }) {
+
+  const history = useHistory();
+
+  if (authorised) {
+    return (
       <p>
         Welcome!{' '}
         <button
-          onClick={() => {
-            netlifyAuth.signout(() => history.push('/'));
-          }}
+          onClick={() => netlifyAuth.signout(() => history.push('/'))}
         >
           Sign out
         </button>
       </p>
-    ) : (
-      <p>You are not logged in.</p>
     )
-);
+  } else {
+    return <p>You are not logged in.</p>;
+  }
+}
 
-function PrivateRoute({ component: Component, ...rest }) {
+function PrivateRoute({ component: Component, authorised, ...rest }) {
   return (
     <Route
       {...rest}
       render={props =>
-        netlifyAuth.isAuthenticated ? (
+        authorised ? (
           <Component {...props} />
         ) : (
           <Redirect
             to={{
-              pathname: '/login',
-              state: { from: props.location }
+                pathname: '/login',
+                state: {
+                  from: props.history.location,
+                  authorised: authorised
+                }
             }}
           />
         )
@@ -95,22 +113,21 @@ function PrivateRoute({ component: Component, ...rest }) {
   );
 }
 
-function Login({ authorised, handleAuthorised, from}) {
+function Login(props) {
 
-  const login = () => {
-    netlifyAuth.authenticate((user) => {
-      handleAuthorised(true);
-      console.log(user);
+  const history = useHistory();
 
-    });
-  };
-
-  if (authorised) return <Redirect to={from} />;
-
+  if (props.authorised) {
+    history.push(props.location.state.from.path);
+  }
   return (
     <div>
-      <p>You must log in to view the page at {from}</p>
-      <button onClick={login}>Log in</button>
+      <p>You must log in to view the page at {props.location.state.from.path}</p>
+      <button onClick={(props) => {
+        netlifyAuth.authenticate(() => {
+          console.log(props.location.state.from.pathname);
+        });
+      }}>Log in</button>
     </div>
   );
 }
