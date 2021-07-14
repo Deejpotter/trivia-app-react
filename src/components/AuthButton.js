@@ -1,14 +1,16 @@
-import React from 'react';
-import { Redirect } from 'react-router-dom';
+import React, { useContext } from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
+import Context from './Context';
 
-function AuthButton({ authorised }) {
+function AuthButton(props) {
+
+    const { auth } = useContext(Context);
 
     return (
-        authorised ? (
-            <button onClick={() => netlifyIdentity.logout}>Sign Out</button>
+        auth ? (
+            <button onClick={() => netlifyIdentity.logout()}>Sign Out</button>
         ) : (
-            <button onClick={() => netlifyIdentity.open}>Sign In</button>
+            <button onClick={() => netlifyIdentity.open()}>Sign In</button>
         )
     );
 }

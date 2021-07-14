@@ -2,9 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 
-function Header({ authorised }) {
+function Header(props) {
     return (
-        
         <header>
             <div className="navbar shadow">
                 <div className="container">
@@ -13,11 +12,10 @@ function Header({ authorised }) {
                             <img src="/images/logo.png" alt="Deej Potter Designs logo." height="150" />
                         </Link>
                     </div>
-                    <Navbar authorised={authorised}/>
+                    <Navbar />
                 </div>
             </div>
         </header>
-
     );
 }
 

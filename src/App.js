@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter, Route, Switch, Redirect, useHistory } from 'react-router-dom';
+import React, { createContext, useState } from 'react';
+import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import netlifyIdentity from 'netlify-identity-widget';
 
 import './App.css';
@@ -7,69 +7,66 @@ import Header from './components/Header';
 import Home from './components/Home';
 import Footer from './components/Footer';
 import Login from "./components/Login";
-import Trivia from './components/Trivia';
-import Answers from './components/Answers';
+import User from './components/User';
+import Admin from './components/Admin';
+import Context from './components/Context';
 
 
 function App() {
   const [authorised, setAuthorised] = useState(false);
 
-  const user = netlifyIdentity.currentUser();
+  let user = netlifyIdentity.currentUser();
   const history = useHistory();
 
-  function handleAuthorised(value) {
-    setAuthorised(value);
-  }
-
   if (user && !authorised) {
-    handleAuthorised(true);
+    setAuthorised(true);
   }
   netlifyIdentity.on('open', () => {
-    if (user) {
+    if (user && authorised) {
       netlifyIdentity.close();
+      history.push('/');
     }
   });
   netlifyIdentity.on('close', () => {
-    if (user) {
+    if (user && authorised) {
       history.push('/');
     }
   });
   netlifyIdentity.on('login', () => {
     if (user) {
-      handleAuthorised(true);
+      setAuthorised(true);
       netlifyIdentity.close();
       history.push('/');
     }
   });
   netlifyIdentity.on('logout', () => {
-    if (user) {
-      handleAuthorised(false);
+    if (authorised) {
+      setAuthorised(false);
+      user = null;
       history.push('/');
     }
   });
-  console.log(user);
+  console.log(user, authorised);
 
   return (
-    <>
-      <BrowserRouter>
-        <Header />
-        <Switch>
-          <Route path="/trivia">
-            <Trivia authorised={authorised} handleAuthorised={handleAuthorised} user={user} />
-          </Route>
-          <Route path="/answers">
-            <Answers authorised={authorised} handleAuthorised={handleAuthorised} user={user} />
-          </Route>
-          <Route path="/login">
-            <Login authorised={authorised} handleAuthorised={handleAuthorised} user={user} />
-          </Route>
-          <Route path="/">
-            <Home authorised={authorised} handleAuthorised={handleAuthorised} />
-          </Route>
-        </Switch>
-        <Footer />
-      </BrowserRouter>
-    </>
+    <Context.Provider value={{ auth: authorised, user: user }}>
+      <Header />
+      <Switch>
+        <Route path="/user">
+          <User />
+        </Route>
+        <Route path="/admin">
+          <Admin />
+        </Route>
+        <Route path="/login">
+          <Login />
+        </Route>
+        <Route path="/">
+          <Home />
+        </Route>
+      </Switch>
+      <Footer />
+    </Context.Provider>
   );
 }
 
