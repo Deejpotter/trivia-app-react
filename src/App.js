@@ -1,5 +1,5 @@
-import React, { createContext, useState } from 'react';
-import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Route, Switch, useHistory } from 'react-router-dom';
 import netlifyIdentity from 'netlify-identity-widget';
 
 import './App.css';
